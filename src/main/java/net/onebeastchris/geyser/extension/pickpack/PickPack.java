@@ -115,7 +115,7 @@ public class PickPack implements Extension {
     @Subscribe
     public void onCommandEvent(GeyserDefineCommandsEvent commandsEvent) {
         commandsEvent.register(Command.builder(this)
-                .name("menu")
+                .name("select")
                 .aliases(List.of("list"))
                 .bedrockOnly(true)
                 .playerOnly(true)
