@@ -1,5 +1,5 @@
-id: pickpack
-name: PickPack
+id: nexpack
+name: NexPack
 main: net.onebeastchris.geyser.extension.pickpack.PickPack
 api: 2.4.1
 version: 1.2.4
