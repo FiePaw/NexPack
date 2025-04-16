@@ -5,7 +5,7 @@ on:
       - "onlyone"
 jobs:
   build:
-    name: Build
+    name: New
     runs-on: ubuntu-latest
     container:
       image: gradle:8-jdk17
