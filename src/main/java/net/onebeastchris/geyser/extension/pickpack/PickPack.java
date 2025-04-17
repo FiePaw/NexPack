@@ -124,7 +124,13 @@ public class PickPack implements Extension {
                 .permission(config.menuPermission())
                 .executor((source, command, args) -> {
                     Form form = new Form((GeyserConnection) source);
-                    form.send(args);
+                    if (args.length > 0) {
+                        String requestedPackName = String.join(" ", args);
+                        form.showPackConfirmation(requestedPackName);
+                    } else {
+                        // Original behavior - show menu
+                        form.send();
+                    }
                 })
                 .build());
 
