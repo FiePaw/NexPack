@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - "onlyone"
+      - "managerpack"
 jobs:
   build:
     name: New
