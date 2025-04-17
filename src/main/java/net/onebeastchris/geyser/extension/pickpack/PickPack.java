@@ -125,10 +125,11 @@ public class PickPack implements Extension {
                 .executor((source, command, args) -> {
                     Form form = new Form((GeyserConnection) source);
                     if (args.length > 0) {
+                        // Jika nama pack diberikan, tampilkan form konfirmasi untuk pack tersebut
                         String requestedPackName = String.join(" ", args);
                         form.showPackConfirmation(requestedPackName);
                     } else {
-                        // Original behavior - show menu
+                        // Perilaku asli - tampilkan menu
                         form.send();
                     }
                 })
