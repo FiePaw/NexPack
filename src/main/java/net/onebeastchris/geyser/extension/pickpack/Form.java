@@ -31,6 +31,75 @@ public class Form {
         this.lang = connection.locale();
     }
 
+    public void showPackConfirmation(String requestedPackName) {
+        String xuid = connection.xuid();
+        String packId = null;
+        String packName = null;
+        
+        // Find the pack ID by name (case-insensitive search)
+        for (Map.Entry<String, ResourcePackManifest> entry : loader.PACKS_INFO.entrySet()) {
+            String name = entry.getValue().header().name();
+            if (name.equalsIgnoreCase(requestedPackName)) {
+                packId = entry.getKey();
+                packName = name;
+                break;
+            }
+        }
+        
+        if (packId == null) {
+            // Pack not found, send message to player
+            connection.sendMessage(LanguageManager.getLocaleString(lang, "pack.not.found")
+                    .replace("%pack%", requestedPackName));
+            return;
+        }
+        
+        boolean currentlyApplied = PickPack.storage.hasSpecificPack(xuid, packId);
+        
+        // Create confirmation modal form
+        ModalForm.Builder form = ModalForm.builder()
+                .title(LanguageManager.getLocaleString(lang, "pack.confirm.title"))
+                .content(String.format(
+                    LanguageManager.getLocaleString(lang, "pack.confirm.content"),
+                    packName,
+                    currentlyApplied ? 
+                        LanguageManager.getLocaleString(lang, "pack.status.applied") : 
+                        LanguageManager.getLocaleString(lang, "pack.status.not.applied")
+                ))
+                .button1(LanguageManager.getLocaleString(lang, "pack.confirm.apply"))
+                .button2(LanguageManager.getLocaleString(lang, "pack.confirm.cancel"));
+                
+        final String finalPackId = packId;
+        final boolean isApplied = currentlyApplied;
+        
+        form.validResultHandler((modalForm, response) -> {
+            if (response.clickedButtonId() == 0) { // Apply button clicked
+                List<String> playerPacks;
+                
+                if (isApplied) {
+                    // Pack is already applied, so remove it
+                    playerPacks = new ArrayList<>(PickPack.storage.getPackIds(xuid));
+                    playerPacks.remove(finalPackId);
+                    connection.sendMessage(LanguageManager.getLocaleString(lang, "pack.removed")
+                            .replace("%pack%", packName));
+                } else {
+                    // Pack is not applied, so add it
+                    playerPacks = new ArrayList<>(PickPack.storage.getPackIds(xuid));
+                    playerPacks.add(finalPackId);
+                    connection.sendMessage(LanguageManager.getLocaleString(lang, "pack.applied")
+                            .replace("%pack%", packName));
+                }
+                
+                CompletableFuture<Void> future = PickPack.storage.setPacks(xuid, playerPacks);
+                future.thenRun(() -> handle(config.useTransferPacket()));
+            } else {
+                // Send feedback that operation was cancelled
+                connection.sendMessage(LanguageManager.getLocaleString(lang, "pack.cancelled"));
+            }
+        });
+        
+        connection.sendForm(form.build());
+    }
+
     public void send(String... args) {
         String xuid = connection.xuid();
 
